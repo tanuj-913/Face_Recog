@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Face Recognition UI</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .dropzone { border: 2px dashed #777; padding: 40px; text-align: center; margin-bottom: 20px; cursor: pointer; }
+    .dropzone.dragover { border-color: #333; background: #f7f7f7; }
+  </style>
+</head>
+<body>
+  <h1>Face Recognition Tester</h1>
+
+  <section>
+    <h2>Register Face</h2>
+    <form id="form-register">
+      Number: <input name="reporter_number" placeholder="E.g. 123..."><br><br> 
+      <div id="drop-register" class="dropzone">Drag & Drop or Click to Select Image</div>
+      <input type="file" name="image" id="file-register" hidden> 
+      <button type="submit">Register</button>
+    </form>
+  </section>
+
+  <hr>
+
+  <section>
+    <h2>Search Face</h2>
+    <form id="form-search">
+      <div id="drop-search" class="dropzone">Drag & Drop or Click to Select Image</div>
+      <input type="file" name="image" id="file-search" hidden> 
+      <button type="submit">Search</button>
+    </form>
+  </section>
+
+  <hr>
+  <h2>Response</h2>
+  <pre id="result"></pre>
+
+  <script>
+    const handleDropClick = (dropEl, fileInput) => {
+      dropEl.addEventListener("dragover", e => {
+        e.preventDefault();
+        dropEl.classList.add("dragover");
+      });
+      dropEl.addEventListener("dragleave", () => dropEl.classList.remove("dragover"));
+      dropEl.addEventListener("drop", e => {
+        e.preventDefault();
+        dropEl.classList.remove("dragover");
+        const file = e.dataTransfer.files[0];
+        if (file) fileInput.files = e.dataTransfer.files;
+        dropEl.textContent = "Selected: " + file.name;
+      });
+      dropEl.addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files.length)
+          dropEl.textContent = "Selected: " + fileInput.files[0].name;
+      });
+    };
+
+    handleDropClick(document.getElementById("drop-register"), document.getElementById("file-register"));
+    handleDropClick(document.getElementById("drop-search"), document.getElementById("file-search"));
+
+    const doSubmit = async (form, endpoint) => {
+      const data = new FormData(form);
+      const res = await fetch(endpoint, { method: 'POST', body: data });
+      const result = await res.json();
+      document.getElementById("result").textContent = JSON.stringify(result, null, 2);
+    };
+
+    document.getElementById("form-register").onsubmit = e => {
+      e.preventDefault();
+      doSubmit(e.target, "/report-missing"); 
+    };
+
+    document.getElementById("form-search").onsubmit = e => {
+      e.preventDefault();
+      doSubmit(e.target, "/report-found"); 
+    };
+  </script>
+</body>
+</html>

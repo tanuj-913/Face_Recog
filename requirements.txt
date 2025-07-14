@@ -1,0 +1,8 @@
+flask
+flask-cors
+face_recognition
+dlib-bin
+face_recognition_models
+numpy
+Pillow
+opencv-python
